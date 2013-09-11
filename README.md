@@ -58,10 +58,18 @@ change {URL} with the url chosen for wayback.xml
 	
 ### available urls
 
-| http://{WAYBACK_URL} | wayback home page |
-| http://{WAYBACK_URL}/xml/*/{URL} | xml output for an archived url |
-| http://{WAYBACK_URL}/memento/timegate/{URL} | memento timegate for an archived url |
-| http://{WAYBACK_URL}/memento/20120120193226/{URL} | memento at a specified date |
-| http://{WAYBACK_URL}/list/timemap/link/{URL} | memento timemap |
-| http://{WAYBACK_URL}/list/timebundle/{URL} | memento timebundle |
-| http://{WAYBACK_URL}/list/timemap/rdf/{URL} | memento timebundle rdf |
+`http://{WAYBACK_URL}`  wayback home page  
+
+`http://{WAYBACK_URL}/xml/*/{URL}`  xml output for an archived url 
+
+`http://{WAYBACK_URL}/memento/timegate/{URL}`  memento timegate for an archived url 
+
+`http://{WAYBACK_URL}/memento/20120120193226/{URL}`  memento at a specified date 
+
+`http://{WAYBACK_URL}/list/timemap/link/{URL}`  memento timemap 
+
+`http://{WAYBACK_URL}/list/timebundle/{URL}` memento timebundle
+
+`http://{WAYBACK_URL}/list/timemap/rdf/{URL}` memento timebundle rdf
+
+
