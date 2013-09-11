@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-2.5.xsd"
+       default-init-method="init">
+
+
+  <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+    <property name="properties">
+      <value>
+        wayback.basedir=/data/indexes
+        wayback.urlprefix={URL}/
+      </value>
+    </property>
+  </bean>
+
+  <bean id="waybackCanonicalizer" class="org.archive.wayback.util.url.AggressiveUrlCanonicalizer" />
+
+
+
+  <bean id="resourcefilelocationdb" class="org.archive.wayback.resourcestore.locationdb.BDBResourceFileLocationDB">
+    <property name="bdbPath" value="${wayback.basedir}/file-db/db/" />
+    <property name="bdbName" value="DB1" />
+    <property name="logPath" value="${wayback.basedir}/file-db/db.log" />
+  </bean>
+
+  <import resource="BDBCollection.xml"/>
+  <import resource="ArchivalUrlReplay.xml"/>
+
+  <bean name="+" class="org.archive.wayback.webapp.ServerRelativeArchivalRedirect">
+    <property name="matchPort" value="8080" />
+    <property name="useCollection" value="true" />
+  </bean>
+
+  <bean name="8080" class="org.archive.wayback.webapp.AccessPoint">
+    <property name="serveStatic" value="true" />
+    <property name="bounceToReplayPrefix" value="false" />
+    <property name="bounceToQueryPrefix" value="false" />
+    <property name="replayPrefix" value="${wayback.urlprefix}" />
+    <property name="queryPrefix" value="${wayback.urlprefix}" />
+    <property name="staticPrefix" value="${wayback.urlprefix}" />
+    <property name="collection" ref="localbdbcollection" />
+    <property name="replay" ref="archivalurlreplay" />
+    <property name="query">
+      <bean class="org.archive.wayback.query.Renderer">
+        <property name="captureJsp" value="/WEB-INF/query/CalendarResults.jsp" />
+      </bean>
+    </property>
+
+    <property name="uriConverter">
+      <bean class="org.archive.wayback.archivalurl.ArchivalUrlResultURIConverter">
+        <property name="replayURIPrefix" value="${wayback.urlprefix}"/>
+      </bean>
+    </property>
+
+    <property name="parser">
+      <bean class="org.archive.wayback.archivalurl.ArchivalUrlRequestParser">
+        <property name="maxRecords" value="10000" />
+        <!--
+        <property name="earliestTimestamp" value="1999" />
+        <property name="latestTimestamp" value="2004" />
+        -->
+      </bean>
+    </property>
+  </bean>
+
+
+  <bean name="8080:xml" class="org.archive.wayback.webapp.AccessPoint">
+    <property name="serveStatic" value="true" />
+    <property name="bounceToReplayPrefix" value="false" />
+    <property name="bounceToQueryPrefix" value="false" />
+    <property name="replayPrefix" value="${wayback.urlprefix}" />
+    <property name="queryPrefix" value="${wayback.urlprefix}" />
+    <property name="staticPrefix" value="${wayback.urlprefix}" />
+    <property name="collection" ref="localbdbcollection" />
+    <property name="replay" ref="archivalurlreplay" />
+    <property name="query">
+      <bean class="org.archive.wayback.query.Renderer">
+        <property name="captureJsp" value="/WEB-INF/query/XMLCaptureResults.jsp" />
+      </bean>
+    </property>
+    <property name="uriConverter">
+      <bean class="org.archive.wayback.archivalurl.ArchivalUrlResultURIConverter">
+        <property name="replayURIPrefix" value="${wayback.urlprefix}"/>
+      </bean>
+    </property>
+    <property name="parser">
+      <bean class="org.archive.wayback.archivalurl.ArchivalUrlRequestParser">
+        <property name="maxRecords" value="10000" />
+      </bean>
+    </property>
+  </bean>
+
+
+  <import resource="MementoReplay.xml"/>
+  <bean name="8080:memento" parent="8080">
+    <property name="replayPrefix" value="{URL}/memento/" />
+    <property name="queryPrefix" value="{URL}/list/" />
+	<property name="configs">
+      <props>
+	    <prop key="aggregationPrefix">{URL}/list/</prop>
+      </props>
+	</property>
+
+    <property name="replay" ref="mementoreplay" />
+    <property name="query">
+      <bean class="org.archive.wayback.query.Renderer">
+        <property name="captureJsp" value="/WEB-INF/query/Memento.jsp" />
+      </bean>
+    </property>
+
+    <property name="uriConverter">
+      <bean class="org.archive.wayback.archivalurl.ArchivalUrlResultURIConverter">
+        <property name="replayURIPrefix" value="{URL}/memento/"/>
+      </bean>
+    </property>
+    <property name="parser">
+      <bean class="org.archive.wayback.memento.MementoRequestParser">
+        <property name="maxRecords" value="10000" />
+        <property name="earliestTimestamp" value="1996" />
+      </bean>
+    </property>
+    <property name="exception">
+      <bean class="org.archive.wayback.exception.BaseExceptionRenderer">
+        <property name="errorJsp" value="/WEB-INF/exception/TimegateError.jsp" />
+      </bean>
+    </property>
+  </bean>
+
+
+  <bean name="8080:list" parent="8080:memento">
+    <property name="replayPrefix" value="{URL}/memento/" />
+    <property name="queryPrefix" value="{URL}/list/" />
+    <property name="staticPrefix" value="{URL}/list/" />
+	<property name="configs">
+	  <props>
+	    <prop key="Prefix">{URL}/memento/</prop>
+	  </props>
+	</property>
+
+    <property name="replay" ref="archivalurlreplay" />
+    <property name="query">
+      <bean class="org.archive.wayback.query.Renderer">
+        <property name="captureJsp" value="/WEB-INF/query/ORE.jsp" />
+      </bean>
+    </property>
+
+    <property name="uriConverter">
+      <bean class="org.archive.wayback.archivalurl.ArchivalUrlResultURIConverter">
+        <property name="replayURIPrefix" value="{URL}/list/"/>
+      </bean>
+    </property>
+  </bean>
+
+</beans>
